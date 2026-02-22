@@ -15,7 +15,6 @@ class DetailResepScreen extends StatelessWidget {
         title: const Text("Detail Resep"),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87,
       ),
       // Menggunakan SingleChildScrollView agar halamannya bisa di-scroll ke bawah
       // jika teks bahan dan langkahnya sangat panjang

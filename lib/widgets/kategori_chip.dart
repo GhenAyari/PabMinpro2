@@ -20,7 +20,8 @@ class KategoriChip extends StatelessWidget {
         margin: const EdgeInsets.only(right: 10),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.deepOrange : Colors.white,
+          // Ganti Colors.white menjadi Theme.of(context).cardColor
+          color: isSelected ? Colors.deepOrange : Theme.of(context).cardColor, 
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? Colors.deepOrange : Colors.grey.shade300,
@@ -30,7 +31,8 @@ class KategoriChip extends StatelessWidget {
           child: Text(
             namaKategori,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.black87,
+              // Ganti Colors.black87 menjadi warna default tema
+              color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyMedium?.color, 
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),

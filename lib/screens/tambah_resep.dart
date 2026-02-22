@@ -49,7 +49,6 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
         title: const Text("Tambah Resep Baru"),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

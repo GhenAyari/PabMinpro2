@@ -69,7 +69,6 @@ class _EditResepScreenState extends State<EditResepScreen> {
         title: const Text("Edit Resep"),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

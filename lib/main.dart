@@ -5,7 +5,10 @@ import 'package:minpro1/widgets/kategori_chip.dart';
 import 'package:minpro1/widgets/resep_card.dart';
 import 'package:minpro1/screens/tambah_resep.dart';
 import 'package:minpro1/screens/edit_resep.dart';
-import 'package:minpro1/database/db_helper.dart'; // Import Database Helper
+import 'package:minpro1/database/db_helper.dart';
+
+// 1. Variabel global untuk merekam status Tema (menyala dari awal dengan Light Mode)
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() {
   runApp(const AplikasiResepKu());
@@ -16,16 +19,39 @@ class AplikasiResepKu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Resepku',
-      theme: ThemeData(
-        primaryColor: Colors.deepOrange,
-        scaffoldBackgroundColor: const Color(0xFFF7F7F9),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        useMaterial3: true,
-      ),
-      home: const BerandaResep(),
+    // 2. ValueListenableBuilder bertugas memantau tombol tema dan me-refresh seluruh aplikasi
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentMode, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Resepku',
+          themeMode: currentMode, // Mengikuti status dari Notifier
+          
+          // --- TEMA TERANG (LIGHT MODE) ---
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primaryColor: Colors.deepOrange,
+            scaffoldBackgroundColor: const Color(0xFFF7F7F9),
+            cardColor: Colors.white, // Latar kartu resep terang
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.light),
+            useMaterial3: true,
+            appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent, elevation: 0),
+          ),
+          
+          // --- TEMA GELAP (DARK MODE) ---
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primaryColor: Colors.deepOrange,
+            scaffoldBackgroundColor: const Color(0xFF121212), // Latar layar gelap
+            cardColor: const Color(0xFF1E1E1E), // Latar kartu resep lebih abu-abu
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.dark),
+            useMaterial3: true,
+            appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent, elevation: 0),
+          ),
+          home: const BerandaResep(),
+        );
+      }
     );
   }
 }
@@ -42,39 +68,31 @@ class _BerandaResepState extends State<BerandaResep> {
   String kategoriPilihan = "Semua";
   String kataKunciPencarian = "";
 
-  // 1. Variabel penampung data dari database
   List<Resep> daftarResep = [];
-  bool isLoading = true; // Indikator loading saat mengambil data
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _refreshResep(); // 2. Ambil data dari database saat aplikasi pertama dibuka
+    _refreshResep();
   }
 
-  // 3. Fungsi untuk mengambil data dari SQLite
   Future<void> _refreshResep() async {
     setState(() => isLoading = true);
-    
     try {
       final data = await DBHelper.instance.getAllResep();
       setState(() {
         daftarResep = data;
       });
     } catch (e) {
-      // Jika terjadi error, errornya akan dicetak ke terminal VS Code
       debugPrint("Terjadi Error pada Database: $e");
     } finally {
-      // Blok finally AKAN SELALU DIJALANKAN, sehingga loading pasti berhenti
-      setState(() {
-        isLoading = false;
-      });
+      setState(() { isLoading = false; });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Logika filter sekarang menggunakan daftarResep dari database
     List<Resep> resepTampil = daftarResep.where((resep) {
       final cocokKategori = kategoriPilihan == "Semua" || resep.kategori == kategoriPilihan;
       final cocokPencarian = resep.judul.toLowerCase().contains(kataKunciPencarian.toLowerCase());
@@ -83,18 +101,29 @@ class _BerandaResepState extends State<BerandaResep> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        // Hapus penentuan warna teks (color: Colors.black) agar menyesuaikan tema otomatis
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Halo, Koki!", style: TextStyle(color: Colors.black87, fontSize: 16)),
-            Text("Mau masak apa hari ini?", style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold)),
+            Text("Halo, Koki!", style: TextStyle(fontSize: 16)),
+            Text("Mau masak apa hari ini?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           ],
         ),
+        // 3. Tombol Sun/Moon di pojok kanan atas
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeNotifier.value == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () {
+              // Ganti nilai dari Light ke Dark, atau sebaliknya
+              themeNotifier.value = themeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+            },
+          ),
+        ],
       ),
       body: isLoading 
-      ? const Center(child: CircularProgressIndicator(color: Colors.deepOrange)) // Tampilan saat loading
+      ? const Center(child: CircularProgressIndicator(color: Colors.deepOrange))
       : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -103,10 +132,10 @@ class _BerandaResepState extends State<BerandaResep> {
             // --- Kolom Pencarian ---
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor, // <-- Mengikuti warna tema
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
-                  BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
                 ],
               ),
               child: TextField(
@@ -154,54 +183,31 @@ class _BerandaResepState extends State<BerandaResep> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Slidable(
-                      key: ValueKey(resep.id), // Gunakan ID asli dari database
+                      key: ValueKey(resep.id),
                       endActionPane: ActionPane(
                         motion: const ScrollMotion(),
                         extentRatio: 0.50,
                         children: [
-                          // --- TOMBOL EDIT ---
                           SlidableAction(
                             onPressed: (context) async {
-                              final resepDiperbarui = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditResepScreen(resep: resep),
-                                ),
-                              );
-
+                              final resepDiperbarui = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditResepScreen(resep: resep)));
                               if (resepDiperbarui != null && resepDiperbarui is Resep) {
-                                // 4. UPDATE KE DATABASE
                                 await DBHelper.instance.updateResep(resepDiperbarui);
-                                _refreshResep(); // Refresh layar
-                                
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Resep berhasil diperbarui!'), backgroundColor: Colors.green),
-                                );
+                                _refreshResep(); 
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Resep berhasil diperbarui!'), backgroundColor: Colors.green));
                               }
                             },
-                            backgroundColor: Colors.blue.shade400,
-                            foregroundColor: Colors.white,
-                            icon: Icons.edit,
-                            label: 'Edit',
-                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
+                            backgroundColor: Colors.blue.shade400, foregroundColor: Colors.white, icon: Icons.edit, label: 'Edit', borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
                           ),
-
-                          // --- TOMBOL HAPUS ---
                           SlidableAction(
                             onPressed: (context) async {
-                              // 5. HAPUS DARI DATABASE
                               await DBHelper.instance.deleteResep(resep.id!);
-                              _refreshResep(); // Refresh layar
-
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('${resep.judul} berhasil dihapus'), backgroundColor: Colors.red.shade400),
-                              );
+                              _refreshResep();
+                              if (!mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${resep.judul} berhasil dihapus'), backgroundColor: Colors.red.shade400));
                             },
-                            backgroundColor: Colors.red.shade400,
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Hapus',
-                            borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+                            backgroundColor: Colors.red.shade400, foregroundColor: Colors.white, icon: Icons.delete, label: 'Hapus', borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
                           ),
                         ],
                       ),
@@ -215,35 +221,18 @@ class _BerandaResepState extends State<BerandaResep> {
         ),
       ),
       
-      // --- TOMBOL TAMBAH RESEP BARU ---
-      // --- TOMBOL TAMBAH RESEP BARU ---
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final hasil = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TambahResepScreen()),
-          );
-
+          final hasil = await Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahResepScreen()));
           if (hasil != null && hasil is Resep) {
-            // PASANG JEBAKAN TRY-CATCH DI SINI
             try {
               await DBHelper.instance.insertResep(hasil);
               _refreshResep(); 
-              
               if (!mounted) return; 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${hasil.judul} berhasil ditambahkan!'), backgroundColor: Colors.green),
-              );
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${hasil.judul} berhasil ditambahkan!'), backgroundColor: Colors.green));
             } catch (error) {
-              // JIKA GAGAL, TAMPILKAN ERROR-NYA KE LAYAR HP
               if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('GAGAL MENYIMPAN: $error'), 
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 5), // Tahan 5 detik agar bisa dibaca
-                ),
-              );
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('GAGAL MENYIMPAN: $error'), backgroundColor: Colors.red, duration: const Duration(seconds: 5)));
             }
           }
         },
