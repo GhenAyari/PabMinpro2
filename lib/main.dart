@@ -4,6 +4,8 @@ import 'package:minpro1/widgets/kategori_chip.dart';
 import 'package:minpro1/widgets/resep_card.dart';
 import 'package:minpro1/screens/tambah_resep.dart';
 
+import 'package:flutter_slidable/flutter_slidable.dart';
+
 void main() {
   runApp(const AplikasiResepKu());
 }
@@ -135,13 +137,53 @@ class _BerandaResepState extends State<BerandaResep> {
             const SizedBox(height: 20),
 
             // --- Daftar Resep ---
+            // --- Daftar Resep ---
+            // --- Daftar Resep ---
             Expanded(
               child: resepTampil.isEmpty 
               ? const Center(child: Text("Resep tidak ditemukan 🥲"))
               : ListView.builder(
                 itemCount: resepTampil.length,
                 itemBuilder: (context, index) {
-                  return ResepCard(resep: resepTampil[index]);
+                  final resep = resepTampil[index];
+                  
+                  // Margin yang tadi kita hapus dari resep_card, kita pindahkan ke sini
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Slidable(
+                      key: ValueKey(resep.judul),
+                      
+                      // endActionPane artinya menu muncul saat diswipe dari kanan ke kiri
+                      endActionPane: ActionPane(
+                        motion: const ScrollMotion(), // Efek animasi saat diswipe
+                        extentRatio: 0.25, // Lebar tombol hapus (25% dari layar)
+                        children: [
+                          SlidableAction(
+                            // Aksi ketika tombol HAPUS diklik
+                            onPressed: (context) {
+                              setState(() {
+                                resepDummy.remove(resep); 
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('${resep.judul} berhasil dihapus'),
+                                  backgroundColor: Colors.red.shade400,
+                                ),
+                              );
+                            },
+                            backgroundColor: Colors.red.shade400,
+                            foregroundColor: Colors.white,
+                            icon: Icons.delete,
+                            label: 'Hapus',
+                            borderRadius: BorderRadius.circular(20), // Melengkung menyesuaikan kartu
+                          ),
+                        ],
+                      ),
+                      
+                      // Kartu resepmu
+                      child: ResepCard(resep: resep),
+                    ),
+                  );
                 },
               ),
             ),
