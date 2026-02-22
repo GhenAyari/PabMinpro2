@@ -55,11 +55,21 @@ class _BerandaResepState extends State<BerandaResep> {
   // 3. Fungsi untuk mengambil data dari SQLite
   Future<void> _refreshResep() async {
     setState(() => isLoading = true);
-    final data = await DBHelper.instance.getAllResep();
-    setState(() {
-      daftarResep = data;
-      isLoading = false;
-    });
+    
+    try {
+      final data = await DBHelper.instance.getAllResep();
+      setState(() {
+        daftarResep = data;
+      });
+    } catch (e) {
+      // Jika terjadi error, errornya akan dicetak ke terminal VS Code
+      debugPrint("Terjadi Error pada Database: $e");
+    } finally {
+      // Blok finally AKAN SELALU DIJALANKAN, sehingga loading pasti berhenti
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -206,6 +216,7 @@ class _BerandaResepState extends State<BerandaResep> {
       ),
       
       // --- TOMBOL TAMBAH RESEP BARU ---
+      // --- TOMBOL TAMBAH RESEP BARU ---
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final hasil = await Navigator.push(
@@ -214,13 +225,26 @@ class _BerandaResepState extends State<BerandaResep> {
           );
 
           if (hasil != null && hasil is Resep) {
-            // 6. SIMPAN KE DATABASE
-            await DBHelper.instance.insertResep(hasil);
-            _refreshResep(); // Refresh layar
-            
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${hasil.judul} berhasil ditambahkan!'), backgroundColor: Colors.green),
-            );
+            // PASANG JEBAKAN TRY-CATCH DI SINI
+            try {
+              await DBHelper.instance.insertResep(hasil);
+              _refreshResep(); 
+              
+              if (!mounted) return; 
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${hasil.judul} berhasil ditambahkan!'), backgroundColor: Colors.green),
+              );
+            } catch (error) {
+              // JIKA GAGAL, TAMPILKAN ERROR-NYA KE LAYAR HP
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('GAGAL MENYIMPAN: $error'), 
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 5), // Tahan 5 detik agar bisa dibaca
+                ),
+              );
+            }
           }
         },
         backgroundColor: Colors.deepOrange,

@@ -10,9 +10,11 @@ class DBHelper {
   DBHelper._init();
 
   // Membuka koneksi database
+  // Membuka koneksi database
+ // Membuka koneksi database
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('resep_pribadi.db');
+    _database = await _initDB('resep_v3.db'); // <-- UBAH JADI v3
     return _database!;
   }
 
@@ -37,7 +39,8 @@ class DBHelper {
         kategori TEXT NOT NULL,
         waktu TEXT NOT NULL,
         bahan TEXT NOT NULL,
-        langkah TEXT NOT NULL
+        langkah TEXT NOT NULL,
+        imagePath TEXT 
       )
     ''');
   }
