@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:minpro1/models/resep.dart'; // Import model resep di sini
+import 'package:minpro1/models/resep.dart';
 
 class TambahResepScreen extends StatefulWidget {
   const TambahResepScreen({super.key});
@@ -11,6 +11,9 @@ class TambahResepScreen extends StatefulWidget {
 class _TambahResepScreenState extends State<TambahResepScreen> {
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _waktuController = TextEditingController();
+  // Dua controller baru
+  final TextEditingController _bahanController = TextEditingController();
+  final TextEditingController _langkahController = TextEditingController();
   
   String _kategoriPilihan = 'Berkuah';
   final List<String> _kategoriList = ["Berkuah", "Gorengan", "Sambal", "Manis"];
@@ -19,6 +22,9 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
   void dispose() {
     _judulController.dispose();
     _waktuController.dispose();
+    // Jangan lupa di-dispose
+    _bahanController.dispose();
+    _langkahController.dispose();
     super.dispose();
   }
 
@@ -71,25 +77,55 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
               ),
             ),
+            const SizedBox(height: 16),
+            
+            // --- Input Bahan Masakan ---
+            TextFormField(
+              controller: _bahanController,
+              maxLines: 4, // Membuat kotak input lebih tinggi (multiline)
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                labelText: "Bahan-bahan",
+                alignLabelWithHint: true, // Label ada di pojok kiri atas
+                hintText: "Contoh:\n- 1/2 kg Ayam\n- 2 siung Bawang Putih",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // --- Input Langkah Memasak ---
+            TextFormField(
+              controller: _langkahController,
+              maxLines: 5,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                labelText: "Langkah Memasak",
+                alignLabelWithHint: true,
+                hintText: "Contoh:\n1. Cuci bersih ayam.\n2. Tumis bumbu hingga harum.",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+              ),
+            ),
             const SizedBox(height: 32),
+
             ElevatedButton(
               onPressed: () {
-                // 1. Validasi: Pastikan form tidak kosong
-                if (_judulController.text.isEmpty || _waktuController.text.isEmpty) {
+                // Validasi agar field penting tidak kosong
+                if (_judulController.text.isEmpty || _bahanController.text.isEmpty || _langkahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Judul dan Waktu harus diisi!')),
+                    const SnackBar(content: Text('Judul, Bahan, dan Langkah harus diisi!')),
                   );
-                  return; // Hentikan eksekusi jika kosong
+                  return; 
                 }
 
-                // 2. Bungkus data ke dalam objek Resep
+                // Bungkus semua data ke objek Resep baru
                 final resepBaru = Resep(
                   judul: _judulController.text,
                   kategori: _kategoriPilihan,
-                  waktu: _waktuController.text,
+                  waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
+                  bahan: _bahanController.text,
+                  langkah: _langkahController.text,
                 );
 
-                // 3. Kembali ke halaman sebelumnya SAMBIL membawa data resepBaru
                 Navigator.pop(context, resepBaru);
               },
               style: ElevatedButton.styleFrom(

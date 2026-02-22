@@ -40,10 +40,29 @@ class _BerandaResepState extends State<BerandaResep> {
   String kataKunciPencarian = "";
 
   // Data dummy sekarang menggunakan Class Resep (OOP)
+  // Data dummy sekarang menggunakan Class Resep (OOP) dan field baru
   final List<Resep> resepDummy = [
-    Resep(judul: "Soto Ayam Lamongan", kategori: "Berkuah", waktu: "45 Menit"),
-    Resep(judul: "Tempe Mendoan", kategori: "Gorengan", waktu: "15 Menit"),
-    Resep(judul: "Sambal Terasi Bakar", kategori: "Sambal", waktu: "10 Menit"),
+    Resep(
+      judul: "Soto Ayam Lamongan", 
+      kategori: "Berkuah", 
+      waktu: "45 Menit",
+      bahan: "- 1/2 kg Dada Ayam\n- 2 liter Air\n- Bumbu Halus (Bawang, Kunyit, Ketumbar)",
+      langkah: "1. Rebus ayam hingga matang.\n2. Tumis bumbu halus lalu masukkan ke kuah.\n3. Tambahkan garam dan penyedap.",
+    ),
+    Resep(
+      judul: "Tempe Mendoan", 
+      kategori: "Gorengan", 
+      waktu: "15 Menit",
+      bahan: "- 1 Papan Tempe\n- Tepung Terigu\n- Daun Bawang Iris",
+      langkah: "1. Iris tempe tipis-tipis.\n2. Campur tepung, bumbu, dan air.\n3. Celupkan tempe dan goreng setengah matang.",
+    ),
+    Resep(
+      judul: "Sambal Terasi Bakar", 
+      kategori: "Sambal", 
+      waktu: "10 Menit",
+      bahan: "- 10 Cabai Rawit\n- 1 sdt Terasi Bakar\n- 1 Buah Tomat",
+      langkah: "1. Goreng cabai dan tomat.\n2. Ulek kasar bersama terasi bakar, garam, dan gula.",
+    ),
   ];
 
   @override
