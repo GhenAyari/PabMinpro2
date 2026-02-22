@@ -3,6 +3,7 @@ import 'package:minpro1/models/resep.dart';
 import 'package:minpro1/widgets/kategori_chip.dart';
 import 'package:minpro1/widgets/resep_card.dart';
 import 'package:minpro1/screens/tambah_resep.dart';
+import 'package:minpro1/screens/edit_resep.dart';
 
 import 'package:flutter_slidable/flutter_slidable.dart';
 
@@ -154,12 +155,53 @@ class _BerandaResepState extends State<BerandaResep> {
                       key: ValueKey(resep.judul),
                       
                       // endActionPane artinya menu muncul saat diswipe dari kanan ke kiri
+                      // ... (kode atasnya sama)
                       endActionPane: ActionPane(
-                        motion: const ScrollMotion(), // Efek animasi saat diswipe
-                        extentRatio: 0.25, // Lebar tombol hapus (25% dari layar)
+                        motion: const ScrollMotion(),
+                        extentRatio: 0.50, // Diperbesar jadi 50% layar karena sekarang ada 2 tombol
                         children: [
+                          // --- TOMBOL EDIT ---
                           SlidableAction(
-                            // Aksi ketika tombol HAPUS diklik
+                            onPressed: (context) async {
+                              // Pindah ke Halaman Edit dan tunggu hasilnya
+                              final resepDiperbarui = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditResepScreen(resep: resep),
+                                ),
+                              );
+
+                              // Jika user menekan tombol "Simpan Perubahan"
+                              if (resepDiperbarui != null && resepDiperbarui is Resep) {
+                                setState(() {
+                                  // Cari posisi (index) resep yang lama di dalam list dummy
+                                  int index = resepDummy.indexOf(resep);
+                                  if (index != -1) {
+                                    // Ganti data lama dengan data baru
+                                    resepDummy[index] = resepDiperbarui; 
+                                  }
+                                });
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Resep berhasil diperbarui!'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            },
+                            backgroundColor: Colors.blue.shade400,
+                            foregroundColor: Colors.white,
+                            icon: Icons.edit,
+                            label: 'Edit',
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                            ), // Lengkung di sebelah kiri
+                          ),
+
+                          // --- TOMBOL HAPUS ---
+                          SlidableAction(
                             onPressed: (context) {
                               setState(() {
                                 resepDummy.remove(resep); 
@@ -175,10 +217,14 @@ class _BerandaResepState extends State<BerandaResep> {
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
                             label: 'Hapus',
-                            borderRadius: BorderRadius.circular(20), // Melengkung menyesuaikan kartu
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(20),
+                              bottomRight: Radius.circular(20),
+                            ), // Lengkung di sebelah kanan
                           ),
                         ],
                       ),
+                      // ... (kode child: ResepCard(resep: resep) sama)
                       
                       // Kartu resepmu
                       child: ResepCard(resep: resep),
