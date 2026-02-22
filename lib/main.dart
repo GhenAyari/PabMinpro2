@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:minpro1/models/resep.dart';
 import 'package:minpro1/widgets/kategori_chip.dart';
 import 'package:minpro1/widgets/resep_card.dart';
+import 'package:minpro1/screens/tambah_resep.dart';
 
 void main() {
   runApp(const AplikasiResepKu());
@@ -129,7 +130,15 @@ class _BerandaResepState extends State<BerandaResep> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          // Fungsi Navigator untuk pindah ke halaman TambahResepScreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TambahResepScreen(),
+            ),
+          );
+        },
         backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
