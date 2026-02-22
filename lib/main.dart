@@ -130,14 +130,31 @@ class _BerandaResepState extends State<BerandaResep> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Fungsi Navigator untuk pindah ke halaman TambahResepScreen
-          Navigator.push(
+        // Ubah menjadi async
+        onPressed: () async {
+          // Menunggu hasil (return data) dari halaman TambahResepScreen
+          final hasil = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const TambahResepScreen(),
             ),
           );
+
+          // Jika hasilnya tidak kosong (berarti user menekan tombol Simpan)
+          if (hasil != null && hasil is Resep) {
+            setState(() {
+              // Tambahkan resep baru ke dalam list dummy
+              resepDummy.add(hasil); 
+            });
+
+            // Opsional: Tampilkan notifikasi sukses di bawah layar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${hasil.judul} berhasil ditambahkan!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
         },
         backgroundColor: Colors.deepOrange,
         foregroundColor: Colors.white,

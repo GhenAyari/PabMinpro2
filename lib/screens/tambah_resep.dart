@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minpro1/models/resep.dart'; // Import model resep di sini
 
 class TambahResepScreen extends StatefulWidget {
   const TambahResepScreen({super.key});
@@ -8,15 +9,12 @@ class TambahResepScreen extends StatefulWidget {
 }
 
 class _TambahResepScreenState extends State<TambahResepScreen> {
-  // Controller untuk menangkap inputan teks
   final TextEditingController _judulController = TextEditingController();
   final TextEditingController _waktuController = TextEditingController();
   
-  // State untuk Dropdown Kategori
   String _kategoriPilihan = 'Berkuah';
   final List<String> _kategoriList = ["Berkuah", "Gorengan", "Sambal", "Manis"];
 
-  // Wajib membersihkan controller saat halaman ditutup agar tidak bocor memori (memory leak)
   @override
   void dispose() {
     _judulController.dispose();
@@ -31,33 +29,26 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
         title: const Text("Tambah Resep Baru"),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: Colors.black87, // Warna teks dan tombol back
+        foregroundColor: Colors.black87,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // --- Input Judul Masakan ---
             TextFormField(
               controller: _judulController,
               decoration: InputDecoration(
                 labelText: "Judul Masakan",
                 hintText: "Contoh: Ayam Goreng Lengkuas",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
               ),
             ),
             const SizedBox(height: 16),
-
-            // --- Dropdown Kategori ---
             DropdownButtonFormField<String>(
               value: _kategoriPilihan,
               decoration: InputDecoration(
                 labelText: "Kategori",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
               ),
               items: _kategoriList.map((String kategori) {
                 return DropdownMenuItem<String>(
@@ -67,46 +58,47 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
               }).toList(),
               onChanged: (String? newValue) {
                 if (newValue != null) {
-                  setState(() {
-                    _kategoriPilihan = newValue;
-                  });
+                  setState(() { _kategoriPilihan = newValue; });
                 }
               },
             ),
             const SizedBox(height: 16),
-
-            // --- Input Waktu Memasak ---
             TextFormField(
               controller: _waktuController,
               decoration: InputDecoration(
                 labelText: "Waktu Memasak",
                 hintText: "Contoh: 30 Menit",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
               ),
             ),
             const SizedBox(height: 32),
-
-            // --- Tombol Simpan ---
             ElevatedButton(
               onPressed: () {
-                // Untuk sekarang, tombol ini hanya akan menutup halaman dan kembali ke Beranda
-                // Nanti kita tambahkan logika untuk menyimpan datanya
-                Navigator.pop(context);
+                // 1. Validasi: Pastikan form tidak kosong
+                if (_judulController.text.isEmpty || _waktuController.text.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Judul dan Waktu harus diisi!')),
+                  );
+                  return; // Hentikan eksekusi jika kosong
+                }
+
+                // 2. Bungkus data ke dalam objek Resep
+                final resepBaru = Resep(
+                  judul: _judulController.text,
+                  kategori: _kategoriPilihan,
+                  waktu: _waktuController.text,
+                );
+
+                // 3. Kembali ke halaman sebelumnya SAMBIL membawa data resepBaru
+                Navigator.pop(context, resepBaru);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepOrange,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
-              child: const Text(
-                "Simpan Resep",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
+              child: const Text("Simpan Resep", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
