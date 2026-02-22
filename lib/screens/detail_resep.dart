@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minpro1/models/resep.dart'; // Sesuaikan import model
+import 'dart:io';
 
 class DetailResepScreen extends StatelessWidget {
   // Menerima data resep dari halaman sebelumnya
@@ -27,7 +28,10 @@ class DetailResepScreen extends StatelessWidget {
               width: double.infinity,
               height: 250,
               color: Colors.orange.shade100,
-              child: const Icon(Icons.restaurant_menu, size: 100, color: Colors.deepOrange),
+              // Cek apakah resep punya foto
+              child: resep.imagePath != null && resep.imagePath!.isNotEmpty
+                  ? Image.file(File(resep.imagePath!), fit: BoxFit.cover)
+                  : const Icon(Icons.restaurant_menu, size: 100, color: Colors.deepOrange),
             ),
             
             // --- Konten Teks ---

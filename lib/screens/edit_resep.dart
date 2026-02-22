@@ -127,7 +127,9 @@ class _EditResepScreenState extends State<EditResepScreen> {
                 }
 
                 // Bungkus data yang SUDAH DIUBAH menjadi objek Resep
+                // Bungkus data yang SUDAH DIUBAH menjadi objek Resep
                 final resepDiperbarui = Resep(
+                  id: widget.resep.id, // WAJIB DITAMBAHKAN AGAR DATABASE TAHU MANA YANG DIUPDATE
                   judul: _judulController.text,
                   kategori: _kategoriPilihan,
                   waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
