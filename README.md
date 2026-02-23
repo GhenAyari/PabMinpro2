@@ -45,7 +45,29 @@ Aplikasi ini dilengkapi dengan berbagai fitur interaktif untuk memudahkan penggu
 
 * **Stack & Positioned:** Memungkinkan kita menumpuk widget. Kita menggunakan ini di Halaman Edit untuk menaruh ikon "pensil kecil" persis di atas pojok foto masakan.
 
+* **TextField & TextFormField:** Kotak tempat kamu mengetik pencarian, judul masakan, bahan, dan langkah-langkah.
 
+* **DropdownButtonFormField:** Menu dropdown untuk memilih kategori ("Berkuah", "Gorengan", dll).
+
+* **ElevatedButton:** Tombol utama yang menonjol (seperti tombol "Simpan Resep").
+
+* **FloatingActionButton:** Tombol bundar melayang berikon + di pojok kanan bawah.
+
+* **IconButton:** Ikon yang bisa diklik tanpa kotak latar (seperti ikon Matahari/Bulan di atas).
+
+* **GestureDetector:** Widget transparan yang membuat area apa saja bisa diklik (kita pakai agar kotak foto bisa ditekan untuk membuka galeri, dan kategori bisa diklik).
+
+* **Text & Icon:** Untuk menampilkan tulisan dan ikon bawaan.
+
+* **Image.file:** Untuk menampilkan gambar asli yang diambil dari memori/galeri HP kamu.
+
+* **ClipRRect:** "Gunting" khusus untuk memotong gambar. Gambar dari HP bentuknya kotak tajam, kita pakai ini agar sudut gambar fotonya ikut melengkung sesuai kotak Container.
+
+* **CircleAvatar:** Membuat lingkaran sempurna. Kita jadikan latar belakang hitam transparan untuk ikon pensil di atas foto.
+
+* **Slidable & SlidableAction:** Ini adalah widget dari package luar (flutter_slidable). Fungsinya untuk membuat efek geser (swipe) memunculkan tombol Edit dan Hapus.
+
+* **SnackBar (via ScaffoldMessenger):** Pita notifikasi yang muncul dari bawah layar selama beberapa detik (seperti pemberitahuan "Resep berhasil disimpan" warna hijau atau merah).
 
 ---
 
@@ -55,21 +77,59 @@ Berikut adalah gambaran arsitektur dan struktur *folder* dari aplikasi ini yang 
 
 ```text
 lib/
+├── database/
+│   └── db_helper.dart      # Konfigurasi SQLite: Create, Read, Update, Delete ke database.
 │
 ├── models/
-│   └── recipe_model.dart       # Mendefinisikan struktur data resep (Id, Judul, Kategori, Foto, dll)
+│   └── resep.dart          # Data model untuk objek Resep (parsing dari/ke Map).
 │
 ├── screens/
-│   ├── home_screen.dart        # Halaman utama (Daftar resep, Pencarian, Filter Kategori)
-│   ├── add_recipe_screen.dart  # Form input untuk menambah resep baru & upload foto
-│   └── recipe_detail_screen.dart # Halaman untuk membaca detail bahan dan langkah memasak
+│   ├── detail_resep.dart   # Halaman untuk menampilkan info lengkap satu resep.
+│   ├── edit_resep.dart     # Halaman form untuk mengubah data resep yang sudah ada.
+│   └── tambah_resep.dart   # Halaman form untuk menginput resep baru.
 │
 ├── widgets/
-│   ├── recipe_card.dart        # UI Komponen untuk kartu resep di halaman utama
-│   └── slidable_action.dart    # Komponen untuk fitur swipe-to-edit/delete
+│   ├── kategori_chip.dart  # Komponen UI untuk pilihan kategori (Gorengan, Berkuah, dll).
+│   └── resep_card.dart     # Komponen kartu resep di halaman utama dengan fitur swipe.
 │
-├── utils/
-│   └── theme.dart              # Konfigurasi warna untuk Light & Dark mode
-│
-└── main.dart                   # Entry point aplikasi Flutter
+├── main.dart               # Entry point: Inisialisasi tema, database, dan Home Screen.
+```
+---
+
+## 📱 Dokumentasi Program (Alur Aplikasi)
+
+![Menu Utama](image.png)
+<br> Ini adalah Menu utama dari aplikasi ini dimana langsung muncul menu masakan lalu kategori, dan mencari masakan.
+<br><br>
+![Tampilan Dark Mode](image-1.png)
+<br> Ini adalah tampilan dark mode dari aplikasi ini. Jika kita mengklik logo Bulan yang sebelumnya ada maka akan menjadi dark mode. dan untuk mengembalikan ke light mode cukup klik logo matahari di kanan atas.
+<br><br>
+![Menu Tambah Reseo](image-2.png)
+<br> Klik logo + di kanan bawah maka akan ke tampilan tambah resep baru. Di sini kita wajib memasukan judul masakan, kategori, bahan-bahan dan langkah memasak. Untuk waktu memasak dan foto itu sifatnya opsional jadi tidak wajib diisi.
+<br><br>
+![Akses ke galeri](image-3.png)
+<br>Jika kita ingin memasukkan foto masakan maka aplikasi akan mengakses galeri kita. jadi kita bisa mengambil foto dari galeri untuk dimasukkan ke resep baru.
+<br><br>
+![Simpan Resep](image-4.png)
+<br>Sudah ditulis semunanya tinggal klik "Simpan Resep" dan akan tersimpan
+<br><br>
+![Menu Hapus Resep](image-5.png)
+<br> Resep ote-ote yang tadi kita tambahkan sudah muncul di menu utama. di sini kita mau menghapus menu coto, caranya tinggal swipe ke kiri dan ada tombol edit dan hapus. klik tombol hapus maka menu akan terhapus
+![Resep Terhapus](image-6.png)
+<br><br>
+![Read atau melihat detail resep](image-7.png)
+<br> Melihat resep ote-ote yang tadi ditambahkan tinggal klik saja resepnya dan akan muncul resep detailnya yang sudah kita tambahkan/buat tadi.
+<br><br>
+![Update Resep](image-8.png)
+<br> Geser ke kiri dan akan muncul tombol edit, dan ini adalah fitur update atau edit resep.
+<br>
+![Mengganti foto](image-9.png)
+<br> Di sini mencoba mengganti foto dari ote-ote, klk simpan berubahan.
+<br>
+![Foto Berubah](image-10.png)
+<br>Terlihat bahwa foto ote ote berhasil berubah. dan fitur CRUD di aplikasi ini lengkap.
+
+---
+
+
 
