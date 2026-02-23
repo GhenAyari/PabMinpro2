@@ -27,12 +27,14 @@ Aplikasi ini dilengkapi dengan berbagai fitur interaktif untuk memudahkan penggu
 
 ## 🍕 Widget yang digunakan
 
+### 1. Struktur Utama & Tema
 * **MaterialApp:** Pondasi utama seluruh aplikasi. Di sinilah  mengatur nama aplikasi, warna dasar, dan tema (Terang/Gelap).
 
 * **Scaffold:** Kerangka dasar sebuah halaman putih. Dia yang menyediakan tempat untuk AppBar (kepala halaman), body (isi halaman), dan floatingActionButton (tombol melayang).
 
 * **ValueListenableBuilder**: Widget super yang kita pakai terakhir tadi. Fungsinya untuk mendengarkan perubahan (ketika tombol tema diklik) dan langsung me-refresh seluruh UI tanpa harus memuat ulang halaman.
 
+### 2. Layout & Penataan Posisi
 * **Column & Row:** Menyusun widget secara vertikal (atas ke bawah) dan horizontal (kiri ke kanan).
 
 * **ListView & ListView.builder:** Membuat daftar yang bisa di-scroll. Kita pakai ini untuk deretan kategori dan daftar kartu resep di beranda.
@@ -45,6 +47,8 @@ Aplikasi ini dilengkapi dengan berbagai fitur interaktif untuk memudahkan penggu
 
 * **Stack & Positioned:** Memungkinkan kita menumpuk widget. Kita menggunakan ini di Halaman Edit untuk menaruh ikon "pensil kecil" persis di atas pojok foto masakan.
 
+
+### 3. Input & Tombol (Interaksi)
 * **TextField & TextFormField:** Kotak tempat kamu mengetik pencarian, judul masakan, bahan, dan langkah-langkah.
 
 * **DropdownButtonFormField:** Menu dropdown untuk memilih kategori ("Berkuah", "Gorengan", dll).
@@ -57,6 +61,8 @@ Aplikasi ini dilengkapi dengan berbagai fitur interaktif untuk memudahkan penggu
 
 * **GestureDetector:** Widget transparan yang membuat area apa saja bisa diklik (kita pakai agar kotak foto bisa ditekan untuk membuka galeri, dan kategori bisa diklik).
 
+
+### 4. Teks & Visual
 * **Text & Icon:** Untuk menampilkan tulisan dan ikon bawaan.
 
 * **Image.file:** Untuk menampilkan gambar asli yang diambil dari memori/galeri HP kamu.
@@ -65,6 +71,8 @@ Aplikasi ini dilengkapi dengan berbagai fitur interaktif untuk memudahkan penggu
 
 * **CircleAvatar:** Membuat lingkaran sempurna. Kita jadikan latar belakang hitam transparan untuk ikon pensil di atas foto.
 
+
+### 5. Widget Khusus (Animasi & Peringatan)
 * **Slidable & SlidableAction:** Ini adalah widget dari package luar (flutter_slidable). Fungsinya untuk membuat efek geser (swipe) memunculkan tombol Edit dan Hapus.
 
 * **SnackBar (via ScaffoldMessenger):** Pita notifikasi yang muncul dari bawah layar selama beberapa detik (seperti pemberitahuan "Resep berhasil disimpan" warna hijau atau merah).
