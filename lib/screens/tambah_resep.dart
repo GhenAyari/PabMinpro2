@@ -17,7 +17,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
   final TextEditingController _langkahController = TextEditingController();
   
   String _kategoriPilihan = 'Berkuah';
-  final List<String> _kategoriList = ["Berkuah", "Gorengan", "Sambal", "Manis"];
+  final List<String> _kategoriList = ["Berkuah", "Goreng/tumis", "Sambal", "Manis"];
 
   // --- Variabel untuk Foto ---
   File? _image;

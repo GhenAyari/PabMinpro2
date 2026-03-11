@@ -64,7 +64,7 @@ class BerandaResep extends StatefulWidget {
 }
 
 class _BerandaResepState extends State<BerandaResep> {
-  final List<String> kategori = ["Semua", "Berkuah", "Gorengan", "Sambal", "Manis"];
+  final List<String> kategori = ["Semua", "Berkuah", "Goreng/tumis", "Sambal", "Manis"];
   String kategoriPilihan = "Semua";
   String kataKunciPencarian = "";
 
@@ -105,8 +105,8 @@ class _BerandaResepState extends State<BerandaResep> {
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Halo, Koki!", style: TextStyle(fontSize: 16)),
-            Text("Mau masak apa hari ini?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text("mantap!", style: TextStyle(fontSize: 16)),
+            Text("handak masak apa pian?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           ],
         ),
         // 3. Tombol Sun/Moon di pojok kanan atas
@@ -143,7 +143,7 @@ class _BerandaResepState extends State<BerandaResep> {
                   setState(() { kataKunciPencarian = value; });
                 },
                 decoration: const InputDecoration(
-                  hintText: "Cari resep masakan...",
+                  hintText: "becari dulu",
                   prefixIcon: Icon(Icons.search, color: Colors.grey),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(vertical: 15),
@@ -175,7 +175,7 @@ class _BerandaResepState extends State<BerandaResep> {
             // --- Daftar Resep ---
             Expanded(
               child: resepTampil.isEmpty 
-              ? const Center(child: Text("Belum ada resep. Yuk tambah resep pertamamu! 🍽️"))
+              ? const Center(child: Text("Belum ada resep. ayodah tambah 🍽️"))
               : ListView.builder(
                 itemCount: resepTampil.length,
                 itemBuilder: (context, index) {
