@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Tambahin ini
+import 'package:supabase_flutter/supabase_flutter.dart'; 
 import 'package:minpro1/models/resep.dart';
 
 class EditResepScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _EditResepScreenState extends State<EditResepScreen> {
   final List<String> _kategoriList = ["Berkuah", "Goreng/tumis", "Sambal", "Manis"];
 
   String? _imagePath;
-  bool _isUploading = false; // Indikator loading
+  bool _isUploading = false; 
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -43,7 +43,7 @@ class _EditResepScreenState extends State<EditResepScreen> {
     }
   }
 
-  // Fungsi ambil foto (diperbarui biar bisa kamera/galeri)
+
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
@@ -74,7 +74,6 @@ class _EditResepScreenState extends State<EditResepScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // --- Wadah Foto (Pintar: Bisa bedain Link Internet vs File Lokal) ---
             GestureDetector(
               onTap: _isUploading ? null : _pickImage,
               child: Container(
@@ -92,8 +91,8 @@ class _EditResepScreenState extends State<EditResepScreen> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(15),
                             child: _imagePath!.startsWith('http')
-                                ? Image.network(_imagePath!, fit: BoxFit.cover) // Kalau foto lama (internet)
-                                : Image.file(File(_imagePath!), fit: BoxFit.cover), // Kalau foto baru (lokal)
+                                ? Image.network(_imagePath!, fit: BoxFit.cover)
+                                : Image.file(File(_imagePath!), fit: BoxFit.cover), 
                           ),
                           Positioned(
                             right: 10,
@@ -148,7 +147,7 @@ class _EditResepScreenState extends State<EditResepScreen> {
                 String? finalImageUrl = _imagePath;
 
                 try {
-                  // LOGIKA UPLOAD: Jika _imagePath bukan 'http', berarti itu foto baru dari galeri
+
                   if (_imagePath != null && !_imagePath!.startsWith('http')) {
                     final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
                     if (widget.resep.imagePath != null && widget.resep.imagePath!.startsWith('http')) {
@@ -157,7 +156,7 @@ class _EditResepScreenState extends State<EditResepScreen> {
         .from('resep_images')
         .remove([oldFileName]);
   }
-                    // Upload ke Supabase
+                  
                     await Supabase.instance.client.storage
                         .from('resep_images')
                         .upload(fileName, File(_imagePath!));
@@ -167,8 +166,7 @@ class _EditResepScreenState extends State<EditResepScreen> {
                         .from('resep_images')
                         .getPublicUrl(fileName);
                     
-                    // OPSIONAL: Disini kamu bisa tambah kode hapus foto lama kalau mau rajin, 
-                    // tapi biarkan begini dulu supaya aman buat tugas kuliah.
+                    
                   }
 
                   final resepDiperbarui = Resep(

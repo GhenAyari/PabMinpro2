@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:minpro1/models/resep.dart';
 
-// --- KODE BARU: Buka jalur ke halaman Detail Resep ---
+
 import 'package:minpro1/screens/detail_resep.dart'; 
 
 class ResepCard extends StatelessWidget {
@@ -12,10 +12,10 @@ class ResepCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // --- KODE BARU: Bungkus dengan InkWell agar bisa diklik ---
+
     return InkWell(
       onTap: () {
-        // Logika untuk berpindah ke layar Detail Resep
+       
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -51,7 +51,6 @@ class ResepCard extends StatelessWidget {
             ),
             const SizedBox(width: 16),
 
-            // --- BAGIAN TEKS ---
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,7 +86,6 @@ class ResepCard extends StatelessWidget {
     );
   }
 
-  // --- Logika Menampilkan Foto (Supabase URL & Lokal) ---
   Widget _tampilkanFoto() {
     if (resep.imagePath != null && resep.imagePath!.isNotEmpty) {
       if (resep.imagePath!.startsWith('http')) {

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:minpro1/models/resep.dart'; // Sesuaikan import model
+import 'package:minpro1/models/resep.dart'; 
 import 'dart:io';
 
 class DetailResepScreen extends StatelessWidget {
-  // Menerima data resep dari halaman sebelumnya
   final Resep resep;
 
   const DetailResepScreen({super.key, required this.resep});
@@ -16,20 +15,17 @@ class DetailResepScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      // Menggunakan SingleChildScrollView agar halamannya bisa di-scroll ke bawah
-      // jika teks bahan dan langkahnya sangat panjang
+  
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Gambar Placeholder Besar ---
-            // GANTI BAGIAN GAMBARNYA MENJADI SEPERTI INI:
 resep.imagePath != null && resep.imagePath!.isNotEmpty
     ? (resep.imagePath!.startsWith('http')
         ? Image.network(
             resep.imagePath!,
             width: double.infinity,
-            height: 250, // Sesuaikan tinggi gambar aslimu
+            height: 250, 
             fit: BoxFit.cover,
           )
         : Image.file(
@@ -45,20 +41,17 @@ resep.imagePath != null && resep.imagePath!.isNotEmpty
         child: const Icon(Icons.restaurant, size: 100, color: Colors.grey),
       ),
             
-            // --- Konten Teks ---
             Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Judul Resep
                   Text(
                     resep.judul,
                     style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   
-                  // Label Kategori dan Waktu
                   Row(
                     children: [
                       Container(
@@ -87,7 +80,6 @@ resep.imagePath != null && resep.imagePath!.isNotEmpty
                     child: Divider(thickness: 1), // Garis pembatas
                   ),
                   
-                  // --- Bagian Bahan-bahan ---
                   const Row(
                     children: [
                       Icon(Icons.kitchen, color: Colors.deepOrange),
@@ -101,11 +93,10 @@ resep.imagePath != null && resep.imagePath!.isNotEmpty
                   const SizedBox(height: 10),
                   Text(
                     resep.bahan,
-                    style: const TextStyle(fontSize: 16, height: 1.6), // height 1.6 memberi jarak antar baris
+                    style: const TextStyle(fontSize: 16, height: 1.6),
                   ),
                   const SizedBox(height: 24),
                   
-                  // --- Bagian Langkah Memasak ---
                   const Row(
                     children: [
                       Icon(Icons.format_list_numbered, color: Colors.deepOrange),

@@ -5,7 +5,7 @@ class Resep {
   final String waktu;
   final String bahan;
   final String langkah;
-  final String? imagePath; // <-- Variabel baru untuk foto (Opsional)
+  final String? imagePath; 
 
   Resep({
     this.id,
@@ -25,7 +25,7 @@ class Resep {
       'waktu': waktu,
       'bahan': bahan,
       'langkah': langkah,
-      'imagePath': imagePath, // <-- Simpan ke database
+      'imagePath': imagePath, 
     };
   }
 
@@ -37,7 +37,7 @@ class Resep {
       waktu: map['waktu'],
       bahan: map['bahan'],
       langkah: map['langkah'],
-      imagePath: map['imagepath'], // <-- Ambil dari database
+      imagePath: map['imagepath'],
     );
   }
 }

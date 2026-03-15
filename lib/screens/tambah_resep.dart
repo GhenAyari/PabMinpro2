@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // <-- Tambahan Supabase
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:minpro1/models/resep.dart';
 
 class TambahResepScreen extends StatefulWidget {
@@ -20,14 +20,11 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
   String _kategoriPilihan = 'Berkuah';
   final List<String> _kategoriList = ["Berkuah", "Goreng/tumis", "Sambal", "Manis"];
 
-  // --- Variabel untuk Foto ---
   File? _image;
   final ImagePicker _picker = ImagePicker();
   
-  // Variabel untuk indikator loading saat upload foto
   bool _isUploading = false; 
 
-  // --- KODE BARU: Fungsi mengambil foto (Bisa Kamera / Galeri) ---
   Future<void> _pickImage(ImageSource source) async {
     final XFile? pickedFile = await _picker.pickImage(source: source, imageQuality: 70); // Quality 70 agar tidak terlalu berat saat diupload
     if (pickedFile != null) {
@@ -37,7 +34,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
     }
   }
 
-  // --- KODE BARU: Menu Pilihan Kamera/Galeri ---
+
   void _showPickerOptions() {
     showModalBottomSheet(
       context: context,
@@ -90,7 +87,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
           children: [
             // --- Wadah Foto ---
             GestureDetector(
-              onTap: _isUploading ? null : _showPickerOptions, // Panggil menu pilihan di sini
+              onTap: _isUploading ? null : _showPickerOptions, 
               child: Container(
                 height: 180,
                 width: double.infinity,
@@ -127,7 +124,6 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
             TextFormField(controller: _langkahController, maxLines: 5, decoration: InputDecoration(labelText: "Langkah Memasak", alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 32),
 
-            // --- Tombol Simpan & Logika Upload Supabase ---
             ElevatedButton(
               onPressed: _isUploading ? null : () async { // Kunci tombol saat sedang loading
                 if (_judulController.text.isEmpty || _bahanController.text.isEmpty || _langkahController.text.isEmpty) {
@@ -149,13 +145,12 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
                         .from('resep_images')
                         .upload(fileName, _image!);
 
-                    // 3. Minta link URL publiknya dari Supabase
                     imageUrl = Supabase.instance.client.storage
                         .from('resep_images')
                         .getPublicUrl(fileName);
                   }
 
-                  // 4. Siapkan data resep untuk dikirim kembali ke main.dart
+              
                   final resepBaru = Resep(
                     judul: _judulController.text,
                     kategori: _kategoriPilihan,
