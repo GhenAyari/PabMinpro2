@@ -9,22 +9,15 @@ import 'package:minpro1/screens/edit_resep.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// 1. Variabel global untuk merekam status Tema (menyala dari awal dengan Light Mode)
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 Future<void> main() async {
-  // 1. Pastikan semua widget Flutter sudah siap sebelum menjalankan fungsi lain
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 2. Muat (load) file .env yang tadi kita buat
   await dotenv.load(fileName: ".env");
-
-  // 3. Inisialisasi koneksi ke Supabase menggunakan URL dan Key dari .env
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
-
   runApp(const AplikasiResepKu());
 }
 
@@ -33,32 +26,27 @@ class AplikasiResepKu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 2. ValueListenableBuilder bertugas memantau tombol tema dan me-refresh seluruh aplikasi
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
       builder: (context, currentMode, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Resepku',
-          themeMode: currentMode, // Mengikuti status dari Notifier
-          
-          // --- TEMA TERANG (LIGHT MODE) ---
+          themeMode: currentMode,
           theme: ThemeData(
             brightness: Brightness.light,
             primaryColor: Colors.deepOrange,
             scaffoldBackgroundColor: const Color(0xFFF7F7F9),
-            cardColor: Colors.white, // Latar kartu resep terang
+            cardColor: Colors.white,
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.light),
             useMaterial3: true,
             appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent, elevation: 0),
           ),
-          
-          // --- TEMA GELAP (DARK MODE) ---
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             primaryColor: Colors.deepOrange,
-            scaffoldBackgroundColor: const Color(0xFF121212), // Latar layar gelap
-            cardColor: const Color(0xFF1E1E1E), // Latar kartu resep lebih abu-abu
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            cardColor: const Color(0xFF1E1E1E),
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.dark),
             useMaterial3: true,
             appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent, elevation: 0),
@@ -81,7 +69,6 @@ class _BerandaResepState extends State<BerandaResep> {
   final List<String> kategori = ["Semua", "Berkuah", "Goreng/tumis", "Sambal", "Manis"];
   String kategoriPilihan = "Semua";
   String kataKunciPencarian = "";
-
   List<Resep> daftarResep = [];
   bool isLoading = true;
 
@@ -94,11 +81,8 @@ class _BerandaResepState extends State<BerandaResep> {
   Future<void> _refreshResep() async {
     setState(() => isLoading = true);
     try {
-      // --- KODE BARU: Menarik data dari Supabase ---
       final data = await Supabase.instance.client.from('resep').select();
-      
       setState(() {
-        // Mengubah data Supabase menjadi format List<Resep>
         daftarResep = data.map<Resep>((json) => Resep.fromMap(json)).toList();
       });
     } catch (e) {
@@ -118,7 +102,6 @@ class _BerandaResepState extends State<BerandaResep> {
 
     return Scaffold(
       appBar: AppBar(
-        // Hapus penentuan warna teks (color: Colors.black) agar menyesuaikan tema otomatis
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -126,14 +109,10 @@ class _BerandaResepState extends State<BerandaResep> {
             Text("handak masak apa pian?", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           ],
         ),
-        // 3. Tombol Sun/Moon di pojok kanan atas
         actions: [
           IconButton(
-            icon: Icon(
-              themeNotifier.value == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
-            ),
+            icon: Icon(themeNotifier.value == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
             onPressed: () {
-              // Ganti nilai dari Light ke Dark, atau sebaliknya
               themeNotifier.value = themeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
             },
           ),
@@ -146,10 +125,9 @@ class _BerandaResepState extends State<BerandaResep> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Kolom Pencarian ---
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).cardColor, // <-- Mengikuti warna tema
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5)),
@@ -168,8 +146,6 @@ class _BerandaResepState extends State<BerandaResep> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // --- Daftar Kategori ---
             SizedBox(
               height: 40,
               child: ListView.builder(
@@ -188,8 +164,6 @@ class _BerandaResepState extends State<BerandaResep> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // --- Daftar Resep ---
             Expanded(
               child: resepTampil.isEmpty 
               ? const Center(child: Text("Belum ada resep. ayodah tambah 🍽️"))
@@ -205,7 +179,6 @@ class _BerandaResepState extends State<BerandaResep> {
                         motion: const ScrollMotion(),
                         extentRatio: 0.50,
                         children: [
-                          // --- 1. TOMBOL EDIT (UPDATE SUPABASE) ---
                           SlidableAction(
                             onPressed: (context) async {
                               final resepDiperbarui = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditResepScreen(resep: resep)));
@@ -221,28 +194,45 @@ class _BerandaResepState extends State<BerandaResep> {
                                       'imagepath': resepDiperbarui.imagePath,
                                     })
                                     .eq('id', resepDiperbarui.id!);
-                                    
+                                
                                 _refreshResep(); 
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Resep berhasil diperbarui!'), backgroundColor: Colors.green));
                               }
                             },
-                            backgroundColor: Colors.blue.shade400, foregroundColor: Colors.white, icon: Icons.edit, label: 'Edit', borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
+                            backgroundColor: Colors.blue.shade400, 
+                            foregroundColor: Colors.white, 
+                            icon: Icons.edit, 
+                            label: 'Edit', 
+                            borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
                           ),
-
-                          // --- 2. TOMBOL HAPUS (DELETE SUPABASE) ---
                           SlidableAction(
                             onPressed: (context) async {
-                              await Supabase.instance.client
-                                  .from('resep')
-                                  .delete()
-                                  .eq('id', resep.id!);
-                                  
-                              _refreshResep();
-                              if (!mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${resep.judul} berhasil dihapus'), backgroundColor: Colors.red.shade400));
+                              try {
+                                if (resep.imagePath != null && resep.imagePath!.startsWith('http')) {
+                                  final String fileName = resep.imagePath!.split('/').last;
+                                  await Supabase.instance.client.storage
+                                      .from('resep_images')
+                                      .remove([fileName]);
+                                }
+                                await Supabase.instance.client
+                                    .from('resep')
+                                    .delete()
+                                    .eq('id', resep.id!);
+                                
+                                _refreshResep(); 
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Resep berhasil dihapus!'), backgroundColor: Colors.green));
+                              } catch (e) {
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red));
+                              }
                             },
-                            backgroundColor: Colors.red.shade400, foregroundColor: Colors.white, icon: Icons.delete, label: 'Hapus', borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+                            backgroundColor: Colors.red.shade400, 
+                            foregroundColor: Colors.white, 
+                            icon: Icons.delete, 
+                            label: 'Hapus', 
+                            borderRadius: const BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
                           ),
                         ],
                       ),
@@ -255,8 +245,6 @@ class _BerandaResepState extends State<BerandaResep> {
           ],
         ),
       ),
-      
-      // --- 3. TOMBOL TAMBAH (CREATE SUPABASE) ---
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final hasil = await Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahResepScreen()));
@@ -270,7 +258,6 @@ class _BerandaResepState extends State<BerandaResep> {
                 'langkah': hasil.langkah,
                 'imagepath': hasil.imagePath, 
               });
-              
               _refreshResep(); 
               if (!mounted) return; 
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${hasil.judul} berhasil ditambahkan!'), backgroundColor: Colors.green));

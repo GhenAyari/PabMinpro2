@@ -151,7 +151,12 @@ class _EditResepScreenState extends State<EditResepScreen> {
                   // LOGIKA UPLOAD: Jika _imagePath bukan 'http', berarti itu foto baru dari galeri
                   if (_imagePath != null && !_imagePath!.startsWith('http')) {
                     final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-                    
+                    if (widget.resep.imagePath != null && widget.resep.imagePath!.startsWith('http')) {
+    final String oldFileName = widget.resep.imagePath!.split('/').last;
+    await Supabase.instance.client.storage
+        .from('resep_images')
+        .remove([oldFileName]);
+  }
                     // Upload ke Supabase
                     await Supabase.instance.client.storage
                         .from('resep_images')
