@@ -112,7 +112,7 @@ resep.imagePath != null && resep.imagePath!.isNotEmpty
                     resep.langkah,
                     style: const TextStyle(fontSize: 16, height: 1.6),
                   ),
-                  const SizedBox(height: 40), // Ruang kosong di paling bawah
+                  const SizedBox(height: 40), 
                 ],
               ),
             ),

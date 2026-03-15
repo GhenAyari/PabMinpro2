@@ -85,7 +85,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // --- Wadah Foto ---
+      
             GestureDetector(
               onTap: _isUploading ? null : _showPickerOptions, 
               child: Container(
@@ -131,13 +131,13 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
                   return; 
                 }
 
-                setState(() { _isUploading = true; }); // Nyalakan animasi loading
-                String? imageUrl; // Variabel untuk menyimpan link dari Supabase
+                setState(() { _isUploading = true; }); 
+                String? imageUrl; 
 
                 try {
-                  // Jika user memilih foto, upload ke Supabase Storage!
+              
                   if (_image != null) {
-                    // 1. Buat nama file unik pakai waktu saat ini
+                    
                     final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
 
                     // 2. Upload file fisik ke bucket 'resep_images'
@@ -157,7 +157,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
                     waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
                     bahan: _bahanController.text,
                     langkah: _langkahController.text,
-                    imagePath: imageUrl, // <-- Nah! Sekarang isinya adalah LINK WEB, bukan path lokal
+                    imagePath: imageUrl, 
                   );
 
                   if (!mounted) return;
@@ -167,7 +167,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal upload foto: $e'), backgroundColor: Colors.red));
                 } finally {
                   if (mounted) {
-                    setState(() { _isUploading = false; }); // Matikan animasi loading
+                    setState(() { _isUploading = false; }); 
                   }
                 }
               },
