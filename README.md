@@ -4,11 +4,7 @@ Aplikasi **Resepku** adalah platform manajemen resep masakan berbasis mobile yan
 
 ---
 
-<<<<<<< HEAD
 ##  Informasi Mahasiswa
-=======
-## Informasi Mahasiswa
->>>>>>> 37a1bfd0d4b880ab1ac0007ce4809bbdd13bae4d
 * **Nama:** Ghendida Gantari Ayari
 * **NIM:** 2409116080 B2024
 * **Program Studi:** Sistem Informasi
@@ -18,17 +14,10 @@ Aplikasi **Resepku** adalah platform manajemen resep masakan berbasis mobile yan
 
 ---
 
-<<<<<<< HEAD
 ##  Deskripsi Program 
 Melanjutkan pengembangan dari Mini Project 1, versi ini berfokus pada **integrasi database eksternal** dan **manajemen media**. Aplikasi tidak lagi menggunakan penyimpanan lokal, melainkan sudah terhubung sepenuhnya ke internet menggunakan layanan Supabase.
 
 ###  Widget yang Digunakan
-=======
-## Deskripsi Singkat Program
-Melanjutkan pengembangan dari Mini Project 1, versi ini berfokus pada **integrasi database eksternal** dan **manajemen media**. Aplikasi tidak lagi menggunakan penyimpanan lokal, melainkan sudah terhubung sepenuhnya ke internet menggunakan layanan Supabase.
-
-### Widget yang Digunakan
->>>>>>> 37a1bfd0d4b880ab1ac0007ce4809bbdd13bae4d
 Aplikasi ini memanfaatkan berbagai widget Flutter untuk membangun UI yang responsif dan interaktif:
 * **Layout:** `Scaffold`, `Column`, `Row`, `Expanded`, `SizedBox`.
 * **List & Scroll:** `ListView.builder`, `SingleChildScrollView`.
