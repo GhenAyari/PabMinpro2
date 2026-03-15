@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Tambahin ini
 import 'package:minpro1/models/resep.dart';
 
 class EditResepScreen extends StatefulWidget {
@@ -19,10 +20,10 @@ class _EditResepScreenState extends State<EditResepScreen> {
   late TextEditingController _langkahController;
   
   late String _kategoriPilihan;
-  final List<String> _kategoriList = ["Berkuah", "Gorengan", "Sambal", "Manis"];
+  final List<String> _kategoriList = ["Berkuah", "Goreng/tumis", "Sambal", "Manis"];
 
-  // --- Variabel untuk menampung path foto ---
   String? _imagePath;
+  bool _isUploading = false; // Indikator loading
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -33,7 +34,6 @@ class _EditResepScreenState extends State<EditResepScreen> {
     _bahanController = TextEditingController(text: widget.resep.bahan);
     _langkahController = TextEditingController(text: widget.resep.langkah);
     
-    // Mengambil data foto lama jika ada
     _imagePath = widget.resep.imagePath;
 
     if (_kategoriList.contains(widget.resep.kategori)) {
@@ -43,9 +43,9 @@ class _EditResepScreenState extends State<EditResepScreen> {
     }
   }
 
-  // Fungsi untuk mengganti foto
+  // Fungsi ambil foto (diperbarui biar bisa kamera/galeri)
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
       setState(() {
         _imagePath = pickedFile.path;
@@ -74,9 +74,9 @@ class _EditResepScreenState extends State<EditResepScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // --- Tombol Ganti Foto ---
+            // --- Wadah Foto (Pintar: Bisa bedain Link Internet vs File Lokal) ---
             GestureDetector(
-              onTap: _pickImage,
+              onTap: _isUploading ? null : _pickImage,
               child: Container(
                 height: 180,
                 width: double.infinity,
@@ -91,9 +91,10 @@ class _EditResepScreenState extends State<EditResepScreen> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(15),
-                            child: Image.file(File(_imagePath!), fit: BoxFit.cover),
+                            child: _imagePath!.startsWith('http')
+                                ? Image.network(_imagePath!, fit: BoxFit.cover) // Kalau foto lama (internet)
+                                : Image.file(File(_imagePath!), fit: BoxFit.cover), // Kalau foto baru (lokal)
                           ),
-                          // Ikon kecil di pojok untuk menandakan bisa diubah
                           Positioned(
                             right: 10,
                             bottom: 10,
@@ -116,10 +117,7 @@ class _EditResepScreenState extends State<EditResepScreen> {
             ),
             const SizedBox(height: 24),
 
-            TextFormField(
-              controller: _judulController,
-              decoration: InputDecoration(labelText: "Judul Masakan", border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
-            ),
+            TextFormField(controller: _judulController, decoration: InputDecoration(labelText: "Judul Masakan", border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _kategoriPilihan,
@@ -128,49 +126,63 @@ class _EditResepScreenState extends State<EditResepScreen> {
                 return DropdownMenuItem<String>(value: kategori, child: Text(kategori));
               }).toList(),
               onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() { _kategoriPilihan = newValue; });
-                }
+                if (newValue != null) { setState(() { _kategoriPilihan = newValue; }); }
               },
             ),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _waktuController,
-              decoration: InputDecoration(labelText: "Waktu Memasak", border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
-            ),
+            TextFormField(controller: _waktuController, decoration: InputDecoration(labelText: "Waktu Memasak", border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _bahanController,
-              maxLines: 4,
-              decoration: InputDecoration(labelText: "Bahan-bahan", alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
-            ),
+            TextFormField(controller: _bahanController, maxLines: 4, decoration: InputDecoration(labelText: "Bahan-bahan", alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 16),
-            TextFormField(
-              controller: _langkahController,
-              maxLines: 5,
-              decoration: InputDecoration(labelText: "Langkah Memasak", alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))),
-            ),
+            TextFormField(controller: _langkahController, maxLines: 5, decoration: InputDecoration(labelText: "Langkah Memasak", alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 32),
             
             ElevatedButton(
-              onPressed: () {
+              onPressed: _isUploading ? null : () async {
                 if (_judulController.text.isEmpty || _bahanController.text.isEmpty || _langkahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Judul, Bahan, dan Langkah tidak boleh kosong!')));
                   return; 
                 }
 
-                // Bungkus data dengan imagePath yang baru/lama
-                final resepDiperbarui = Resep(
-                  id: widget.resep.id,
-                  judul: _judulController.text,
-                  kategori: _kategoriPilihan,
-                  waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
-                  bahan: _bahanController.text,
-                  langkah: _langkahController.text,
-                  imagePath: _imagePath, // <-- Path foto ikut disimpan
-                );
+                setState(() { _isUploading = true; });
+                String? finalImageUrl = _imagePath;
 
-                Navigator.pop(context, resepDiperbarui);
+                try {
+                  // LOGIKA UPLOAD: Jika _imagePath bukan 'http', berarti itu foto baru dari galeri
+                  if (_imagePath != null && !_imagePath!.startsWith('http')) {
+                    final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+                    
+                    // Upload ke Supabase
+                    await Supabase.instance.client.storage
+                        .from('resep_images')
+                        .upload(fileName, File(_imagePath!));
+
+                    // Ambil URL barunya
+                    finalImageUrl = Supabase.instance.client.storage
+                        .from('resep_images')
+                        .getPublicUrl(fileName);
+                    
+                    // OPSIONAL: Disini kamu bisa tambah kode hapus foto lama kalau mau rajin, 
+                    // tapi biarkan begini dulu supaya aman buat tugas kuliah.
+                  }
+
+                  final resepDiperbarui = Resep(
+                    id: widget.resep.id,
+                    judul: _judulController.text,
+                    kategori: _kategoriPilihan,
+                    waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
+                    bahan: _bahanController.text,
+                    langkah: _langkahController.text,
+                    imagePath: finalImageUrl, 
+                  );
+
+                  if (!mounted) return;
+                  Navigator.pop(context, resepDiperbarui);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal memperbarui: $e')));
+                } finally {
+                  if (mounted) setState(() { _isUploading = false; });
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade600,
@@ -178,7 +190,9 @@ class _EditResepScreenState extends State<EditResepScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               ),
-              child: const Text("Simpan Perubahan", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: _isUploading 
+                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text("Simpan Perubahan", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
