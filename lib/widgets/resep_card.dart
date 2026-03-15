@@ -23,7 +23,7 @@ class ResepCard extends StatelessWidget {
           ),
         );
       },
-      borderRadius: BorderRadius.circular(15), // Membuat efek sentuhan membulat
+      borderRadius: BorderRadius.circular(15), 
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(

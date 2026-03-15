@@ -26,7 +26,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
   bool _isUploading = false; 
 
   Future<void> _pickImage(ImageSource source) async {
-    final XFile? pickedFile = await _picker.pickImage(source: source, imageQuality: 70); // Quality 70 agar tidak terlalu berat saat diupload
+    final XFile? pickedFile = await _picker.pickImage(source: source, imageQuality: 70); 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
@@ -125,7 +125,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
             const SizedBox(height: 32),
 
             ElevatedButton(
-              onPressed: _isUploading ? null : () async { // Kunci tombol saat sedang loading
+              onPressed: _isUploading ? null : () async { 
                 if (_judulController.text.isEmpty || _bahanController.text.isEmpty || _langkahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Judul, Bahan, dan Langkah harus diisi!')));
                   return; 
@@ -140,7 +140,7 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
                     
                     final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-                    // 2. Upload file fisik ke bucket 'resep_images'
+          
                     await Supabase.instance.client.storage
                         .from('resep_images')
                         .upload(fileName, _image!);

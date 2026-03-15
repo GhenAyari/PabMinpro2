@@ -77,7 +77,7 @@ resep.imagePath != null && resep.imagePath!.isNotEmpty
                   
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Divider(thickness: 1), // Garis pembatas
+                    child: Divider(thickness: 1),
                   ),
                   
                   const Row(
