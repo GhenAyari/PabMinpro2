@@ -1,6 +1,7 @@
-import 'dart:io'; // Untuk membaca File gambar
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Package galeri
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // <-- Tambahan Supabase
 import 'package:minpro1/models/resep.dart';
 
 class TambahResepScreen extends StatefulWidget {
@@ -22,15 +23,48 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
   // --- Variabel untuk Foto ---
   File? _image;
   final ImagePicker _picker = ImagePicker();
+  
+  // Variabel untuk indikator loading saat upload foto
+  bool _isUploading = false; 
 
-  // Fungsi untuk membuka galeri
-  Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  // --- KODE BARU: Fungsi mengambil foto (Bisa Kamera / Galeri) ---
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(source: source, imageQuality: 70); // Quality 70 agar tidak terlalu berat saat diupload
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
       });
     }
+  }
+
+  // --- KODE BARU: Menu Pilihan Kamera/Galeri ---
+  void _showPickerOptions() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.deepOrange),
+              title: const Text('Pilih dari Galeri'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.deepOrange),
+              title: const Text('Jepret pakai Kamera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -54,14 +88,14 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            // --- Tombol Upload Foto ---
+            // --- Wadah Foto ---
             GestureDetector(
-              onTap: _pickImage,
+              onTap: _isUploading ? null : _showPickerOptions, // Panggil menu pilihan di sini
               child: Container(
                 height: 180,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(15),
                   border: Border.all(color: Colors.grey.shade400, width: 1),
                 ),
@@ -82,7 +116,6 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ... (Kode TextField Judul, Kategori, Waktu, Bahan, Langkah tetap sama seperti sebelumnya) ...
             TextFormField(controller: _judulController, decoration: InputDecoration(labelText: "Judul Masakan", border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(value: _kategoriPilihan, decoration: InputDecoration(labelText: "Kategori", border: OutlineInputBorder(borderRadius: BorderRadius.circular(15))), items: _kategoriList.map((String kategori) { return DropdownMenuItem<String>(value: kategori, child: Text(kategori)); }).toList(), onChanged: (String? newValue) { if (newValue != null) { setState(() { _kategoriPilihan = newValue; }); } }),
@@ -94,26 +127,59 @@ class _TambahResepScreenState extends State<TambahResepScreen> {
             TextFormField(controller: _langkahController, maxLines: 5, decoration: InputDecoration(labelText: "Langkah Memasak", alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
             const SizedBox(height: 32),
 
+            // --- Tombol Simpan & Logika Upload Supabase ---
             ElevatedButton(
-              onPressed: () {
+              onPressed: _isUploading ? null : () async { // Kunci tombol saat sedang loading
                 if (_judulController.text.isEmpty || _bahanController.text.isEmpty || _langkahController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Judul, Bahan, dan Langkah harus diisi!')));
                   return; 
                 }
 
-                final resepBaru = Resep(
-                  judul: _judulController.text,
-                  kategori: _kategoriPilihan,
-                  waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
-                  bahan: _bahanController.text,
-                  langkah: _langkahController.text,
-                  imagePath: _image?.path, // <-- Menyimpan lokasi foto ke objek resep
-                );
+                setState(() { _isUploading = true; }); // Nyalakan animasi loading
+                String? imageUrl; // Variabel untuk menyimpan link dari Supabase
 
-                Navigator.pop(context, resepBaru);
+                try {
+                  // Jika user memilih foto, upload ke Supabase Storage!
+                  if (_image != null) {
+                    // 1. Buat nama file unik pakai waktu saat ini
+                    final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+                    // 2. Upload file fisik ke bucket 'resep_images'
+                    await Supabase.instance.client.storage
+                        .from('resep_images')
+                        .upload(fileName, _image!);
+
+                    // 3. Minta link URL publiknya dari Supabase
+                    imageUrl = Supabase.instance.client.storage
+                        .from('resep_images')
+                        .getPublicUrl(fileName);
+                  }
+
+                  // 4. Siapkan data resep untuk dikirim kembali ke main.dart
+                  final resepBaru = Resep(
+                    judul: _judulController.text,
+                    kategori: _kategoriPilihan,
+                    waktu: _waktuController.text.isEmpty ? "-" : _waktuController.text,
+                    bahan: _bahanController.text,
+                    langkah: _langkahController.text,
+                    imagePath: imageUrl, // <-- Nah! Sekarang isinya adalah LINK WEB, bukan path lokal
+                  );
+
+                  if (!mounted) return;
+                  Navigator.pop(context, resepBaru);
+
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Gagal upload foto: $e'), backgroundColor: Colors.red));
+                } finally {
+                  if (mounted) {
+                    setState(() { _isUploading = false; }); // Matikan animasi loading
+                  }
+                }
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
-              child: const Text("Simpan Resep", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: _isUploading 
+                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) 
+                : const Text("Simpan Resep", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

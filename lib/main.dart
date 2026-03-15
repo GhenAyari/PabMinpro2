@@ -5,12 +5,26 @@ import 'package:minpro1/widgets/kategori_chip.dart';
 import 'package:minpro1/widgets/resep_card.dart';
 import 'package:minpro1/screens/tambah_resep.dart';
 import 'package:minpro1/screens/edit_resep.dart';
-import 'package:minpro1/database/db_helper.dart';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart'; 
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 // 1. Variabel global untuk merekam status Tema (menyala dari awal dengan Light Mode)
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
-void main() {
+Future<void> main() async {
+  // 1. Pastikan semua widget Flutter sudah siap sebelum menjalankan fungsi lain
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 2. Muat (load) file .env yang tadi kita buat
+  await dotenv.load(fileName: ".env");
+
+  // 3. Inisialisasi koneksi ke Supabase menggunakan URL dan Key dari .env
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+  );
+
   runApp(const AplikasiResepKu());
 }
 
@@ -80,12 +94,15 @@ class _BerandaResepState extends State<BerandaResep> {
   Future<void> _refreshResep() async {
     setState(() => isLoading = true);
     try {
-      final data = await DBHelper.instance.getAllResep();
+      // --- KODE BARU: Menarik data dari Supabase ---
+      final data = await Supabase.instance.client.from('resep').select();
+      
       setState(() {
-        daftarResep = data;
+        // Mengubah data Supabase menjadi format List<Resep>
+        daftarResep = data.map<Resep>((json) => Resep.fromMap(json)).toList();
       });
     } catch (e) {
-      debugPrint("Terjadi Error pada Database: $e");
+      debugPrint("Terjadi Error pada Supabase: $e");
     } finally {
       setState(() { isLoading = false; });
     }
@@ -188,11 +205,23 @@ class _BerandaResepState extends State<BerandaResep> {
                         motion: const ScrollMotion(),
                         extentRatio: 0.50,
                         children: [
+                          // --- 1. TOMBOL EDIT (UPDATE SUPABASE) ---
                           SlidableAction(
                             onPressed: (context) async {
                               final resepDiperbarui = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditResepScreen(resep: resep)));
                               if (resepDiperbarui != null && resepDiperbarui is Resep) {
-                                await DBHelper.instance.updateResep(resepDiperbarui);
+                                await Supabase.instance.client
+                                    .from('resep')
+                                    .update({
+                                      'judul': resepDiperbarui.judul,
+                                      'kategori': resepDiperbarui.kategori,
+                                      'waktu': resepDiperbarui.waktu,
+                                      'bahan': resepDiperbarui.bahan,
+                                      'langkah': resepDiperbarui.langkah,
+                                      'imagepath': resepDiperbarui.imagePath,
+                                    })
+                                    .eq('id', resepDiperbarui.id!);
+                                    
                                 _refreshResep(); 
                                 if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Resep berhasil diperbarui!'), backgroundColor: Colors.green));
@@ -200,9 +229,15 @@ class _BerandaResepState extends State<BerandaResep> {
                             },
                             backgroundColor: Colors.blue.shade400, foregroundColor: Colors.white, icon: Icons.edit, label: 'Edit', borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), bottomLeft: Radius.circular(20)),
                           ),
+
+                          // --- 2. TOMBOL HAPUS (DELETE SUPABASE) ---
                           SlidableAction(
                             onPressed: (context) async {
-                              await DBHelper.instance.deleteResep(resep.id!);
+                              await Supabase.instance.client
+                                  .from('resep')
+                                  .delete()
+                                  .eq('id', resep.id!);
+                                  
                               _refreshResep();
                               if (!mounted) return;
                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${resep.judul} berhasil dihapus'), backgroundColor: Colors.red.shade400));
@@ -221,12 +256,21 @@ class _BerandaResepState extends State<BerandaResep> {
         ),
       ),
       
+      // --- 3. TOMBOL TAMBAH (CREATE SUPABASE) ---
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final hasil = await Navigator.push(context, MaterialPageRoute(builder: (context) => const TambahResepScreen()));
           if (hasil != null && hasil is Resep) {
             try {
-              await DBHelper.instance.insertResep(hasil);
+              await Supabase.instance.client.from('resep').insert({
+                'judul': hasil.judul,
+                'kategori': hasil.kategori,
+                'waktu': hasil.waktu,
+                'bahan': hasil.bahan,
+                'langkah': hasil.langkah,
+                'imagepath': hasil.imagePath, 
+              });
+              
               _refreshResep(); 
               if (!mounted) return; 
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${hasil.judul} berhasil ditambahkan!'), backgroundColor: Colors.green));

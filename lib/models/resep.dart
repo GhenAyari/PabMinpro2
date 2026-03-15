@@ -37,7 +37,7 @@ class Resep {
       waktu: map['waktu'],
       bahan: map['bahan'],
       langkah: map['langkah'],
-      imagePath: map['imagePath'], // <-- Ambil dari database
+      imagePath: map['imagepath'], // <-- Ambil dari database
     );
   }
 }

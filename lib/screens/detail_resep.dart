@@ -23,15 +23,27 @@ class DetailResepScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- Gambar Placeholder Besar ---
-            Container(
-              width: double.infinity,
-              height: 250,
-              color: Colors.orange.shade100,
-              // Cek apakah resep punya foto
-              child: resep.imagePath != null && resep.imagePath!.isNotEmpty
-                  ? Image.file(File(resep.imagePath!), fit: BoxFit.cover)
-                  : const Icon(Icons.restaurant_menu, size: 100, color: Colors.deepOrange),
-            ),
+            // GANTI BAGIAN GAMBARNYA MENJADI SEPERTI INI:
+resep.imagePath != null && resep.imagePath!.isNotEmpty
+    ? (resep.imagePath!.startsWith('http')
+        ? Image.network(
+            resep.imagePath!,
+            width: double.infinity,
+            height: 250, // Sesuaikan tinggi gambar aslimu
+            fit: BoxFit.cover,
+          )
+        : Image.file(
+            File(resep.imagePath!),
+            width: double.infinity,
+            height: 250,
+            fit: BoxFit.cover,
+          ))
+    : Container(
+        width: double.infinity,
+        height: 250,
+        color: Colors.grey.shade300,
+        child: const Icon(Icons.restaurant, size: 100, color: Colors.grey),
+      ),
             
             // --- Konten Teks ---
             Padding(
